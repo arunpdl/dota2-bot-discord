@@ -62,17 +62,6 @@ const servers = [
   { url: "eat.valve.net", name: "US West (Seattle, WA)", region: "na" },
 ];
 
-const getDotaPing = async ({ args }) => {
-  if (args.length === 0) {
-    return await pingAllServers();
-  }
-  if (args.length === 1) {
-  }
-  if (args.length > 1) {
-    return "Invalid argument. Correct method: !dota-ping asia . Type !help for more details.";
-  }
-};
-
 const pingAllServers = async () => {
   const results = await Promise.all(
     servers.map(async (eachServer) => {

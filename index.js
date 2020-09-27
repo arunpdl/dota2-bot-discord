@@ -1,6 +1,8 @@
+require("dotenv").config();
 const fs = require("fs");
 const Discord = require("discord.js");
-const { BOT_TOKEN, prefix } = require("./config.json");
+const { prefix } = require("./config.json");
+const { BOT_TOKEN } = process.env;
 
 const client = new Discord.Client();
 client.commands = new Discord.Collection();
