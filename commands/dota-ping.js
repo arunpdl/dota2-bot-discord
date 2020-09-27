@@ -94,11 +94,13 @@ module.exports = {
   async execute(message, args) {
     if (args.length === 0) {
       const response = await pingAllServers();
-      message.reply(response);
+      console.log("Response", response);
+      message.reply(response || "Error fetching server info");
     }
     if (args.length === 1) {
       const response = await pingRegionalServers(args);
-      message.reply(response);
+      console.log("Response", response);
+      message.reply(response || "Error fetching server info");
     }
     if (args.length > 1) {
       message.reply(
