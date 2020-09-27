@@ -66,7 +66,10 @@ const pingAllServers = async () => {
   const results = await Promise.all(
     servers.map(async (eachServer) => {
       const res = await ping.promise.probe(eachServer.url);
-      if (res.alive) return `${eachServer.name} - Avg. ${res.avg}ms`;
+      if (res.alive) {
+        console.log("response", res);
+        return `${eachServer.name} - Avg. ${res.avg}ms`;
+      }
     })
   );
   return results;
@@ -94,13 +97,19 @@ module.exports = {
   async execute(message, args) {
     if (args.length === 0) {
       const response = await pingAllServers();
-      console.log("Response", response);
-      message.reply(response || "Error fetching server info");
+      if (response.every((eachRes) => eachRes === undefined)) {
+        message.reply("Error fetching server info");
+      } else {
+        message.reply(response);
+      }
     }
     if (args.length === 1) {
       const response = await pingRegionalServers(args);
-      console.log("Response", response);
-      message.reply(response || "Error fetching server info");
+      if (response.every((eachRes) => eachRes === undefined)) {
+        message.reply("Error fetching server info");
+      } else {
+        message.reply(response);
+      }
     }
     if (args.length > 1) {
       message.reply(
