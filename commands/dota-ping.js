@@ -66,8 +66,8 @@ const pingAllServers = async () => {
   const results = await Promise.all(
     servers.map(async (eachServer) => {
       const res = await ping.promise.probe(eachServer.url);
+      console.log("response", res);
       if (res.alive) {
-        console.log("response", res);
         return `${eachServer.name} - Avg. ${res.avg}ms`;
       }
     })
