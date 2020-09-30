@@ -1,6 +1,11 @@
 require("dotenv").config();
 const fs = require("fs");
 const Discord = require("discord.js");
+
+const ping = require("net-ping");
+
+const session = ping.createSession();
+
 const { prefix } = require("./config.json");
 const { BOT_TOKEN } = process.env;
 
@@ -36,6 +41,10 @@ client.on("message", async (message) => {
     console.log("Error : ", err);
     message.reply("Invalid command!");
   }
+});
+
+session.pingHost("sgp-1.valve.net", (res) => {
+  console.log("steam", res);
 });
 
 client.login(BOT_TOKEN);
