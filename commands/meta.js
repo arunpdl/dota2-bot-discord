@@ -6,9 +6,53 @@ const normalizedHeroData = normalize(heroes);
 
 const fetchWinRate = async (message, arg) => {
   const query = gql`
-    {
+    query DotaQuery {
       heroStats {
         metaTrend {
+          heroId
+          win
+          pick
+        }
+      }
+    }
+  `;
+  request("https://api.stratz.com/graphql", query)
+    .then((data) => {
+      const {
+        heroStats: { metaTrend },
+      } = data;
+
+      const percentage = metaTrend.map((eachHero) => {
+        return {
+          heroId: eachHero.heroId,
+          percent: eachHero.win[13] / eachHero.pick[13],
+        };
+      });
+
+      const final = percentage
+        .sort((a, b) => b.percent - a.percent)
+        .slice(0, 10);
+
+      const arr = final.map((eachHero) => {
+        return `${normalizedHeroData[eachHero.heroId].displayName} - ${(
+          eachHero.percent * 100
+        ).toFixed(2)}%`;
+      });
+      message.channel.send(
+        `Hero Name | ${arg.charAt(0).toUpperCase()}${arg.slice(1)} Rate`
+      );
+      message.channel.send(arr);
+    })
+    .catch((error) => console.error("Error>>>>>", error));
+};
+
+const fetchMetaRate = async (message, arg) => {
+  const currentDate = parseInt(Date.now() / 1000);
+
+  const query = gql`
+    query DotaQuery ($currentDate : Long) {
+      heroStats {
+        metaTrend (day: $currentDate) {
           heroId
           ${arg}
         }
@@ -16,7 +60,7 @@ const fetchWinRate = async (message, arg) => {
     }
   `;
 
-  request("https://api.stratz.com/graphql", query)
+  request("https://api.stratz.com/graphql", query, { currentDate })
     .then((data) => {
       const {
         heroStats: { metaTrend },
@@ -33,13 +77,13 @@ const fetchWinRate = async (message, arg) => {
       const arr = final.map((eachHero) => {
         return `${normalizedHeroData[eachHero.heroId].displayName} - ${(
           (eachHero[arg][13] / sum) *
-          100
+          1000
         ).toFixed(2)}%`;
       });
-      message.reply(
+      message.channel.send(
         `Hero Name | ${arg.charAt(0).toUpperCase()}${arg.slice(1)} Rate`
       );
-      message.reply(arr);
+      message.channel.send(arr);
     })
     .catch((error) => console.error("Error>>>>>", error));
 };
@@ -49,7 +93,11 @@ module.exports = {
   description: "Get meta trends!",
   execute(message, args) {
     if (["win", "pick", "ban"].includes(args[0])) {
-      fetchWinRate(message, args[0]);
+      if (args[0] === "win") {
+        fetchWinRate(message, args[0]);
+      } else {
+        fetchMetaRate(message, args[0]);
+      }
     } else {
       message.reply("Invalid arguments. Valid arguments: win, pick, ban");
     }
