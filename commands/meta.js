@@ -47,12 +47,10 @@ const fetchWinRate = async (message, arg) => {
 };
 
 const fetchMetaRate = async (message, arg) => {
-  const currentDate = parseInt(Date.now() / 1000);
-
   const query = gql`
-    query DotaQuery ($currentDate : Long) {
+    {
       heroStats {
-        metaTrend (day: $currentDate) {
+        metaTrend {
           heroId
           ${arg}
         }
@@ -60,7 +58,7 @@ const fetchMetaRate = async (message, arg) => {
     }
   `;
 
-  request("https://api.stratz.com/graphql", query, { currentDate })
+  request("https://api.stratz.com/graphql", query)
     .then((data) => {
       const {
         heroStats: { metaTrend },
@@ -69,11 +67,13 @@ const fetchMetaRate = async (message, arg) => {
         (total, eachData) => total + eachData[arg][13],
         0
       );
+
       const final = metaTrend
         .sort((a, b) => {
           return parseFloat(b[arg][13]) - parseFloat(a[arg][13]);
         })
         .slice(0, 10);
+
       const arr = final.map((eachHero) => {
         return `${normalizedHeroData[eachHero.heroId].displayName} - ${(
           (eachHero[arg][13] / sum) *
